@@ -7,8 +7,6 @@ export default function MatrixMusicGenerator() {
   const [songUrl, setSongUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('');
-  const [newsApiKey, setNewsApiKey] = useState('');
-  const [sunoApiKey, setSunoApiKey] = useState('');
   const canvasRef = useRef(null);
 
   // Matrix rain effect
@@ -47,25 +45,19 @@ export default function MatrixMusicGenerator() {
   }, []);
 
   const fetchNews = async () => {
-    if (!newsApiKey.trim()) {
-      setStatus('Please enter your NewsAPI key');
-      return;
-    }
-
     setLoading(true);
     setStatus('Fetching latest headlines from the Matrix...');
-    
+
     try {
-      const response = await fetch(
-        `https://newsapi.org/v2/top-headlines?country=us&pageSize=10&apiKey=${newsApiKey}`
-      );
-      
+      const response = await fetch('/api/news');
+
       if (!response.ok) {
-        throw new Error(`NewsAPI error: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || `API error: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+
       if (data.articles && data.articles.length > 0) {
         setNewsHeadlines(data.articles.map(article => article.title));
         setStatus(`Downloaded ${data.articles.length} headlines`);
@@ -96,27 +88,21 @@ export default function MatrixMusicGenerator() {
     setLoading(true);
     setStatus('Generating lyrics from selected headlines...');
 
-    const headlines = selectedHeadlines.map(i => newsHeadlines[i]).join('. ');
-    
-    try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          messages: [
-            { 
-              role: "user", 
-              content: `Create creative song lyrics inspired by these news headlines. Make it catchy and musical, with verses and a chorus. Headlines: ${headlines}
+    const headlines = selectedHeadlines.map(i => newsHeadlines[i]);
 
-Create original lyrics that are inspired by these themes but don't directly quote the headlines. Make it artistic and singable.`
-            }
-          ]
-        })
+    try {
+      const response = await fetch('/api/lyrics', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ headlines }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `API error: ${response.status}`);
+      }
 
       const data = await response.json();
       const lyrics = data.content[0].text;
@@ -135,39 +121,26 @@ Create original lyrics that are inspired by these themes but don't directly quot
       return;
     }
 
-    if (!sunoApiKey.trim()) {
-      setStatus('Please enter your Suno AI API key');
-      return;
-    }
-
     setLoading(true);
     setStatus('Transmitting to Suno AI...');
     setSongUrl('');
 
     try {
-      // Note: This is a placeholder for Suno AI API integration
-      // The actual API endpoint and structure may vary
-      // Check Suno AI documentation at https://suno.ai or their API docs
-      
-      const response = await fetch('https://api.suno.ai/v1/generate', {
+      const response = await fetch('/api/song', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sunoApiKey}`
         },
-        body: JSON.stringify({
-          prompt: generatedLyrics,
-          make_instrumental: false,
-          wait_audio: true
-        })
+        body: JSON.stringify({ lyrics: generatedLyrics }),
       });
 
       if (!response.ok) {
-        throw new Error(`Suno API error: ${response.status} - ${response.statusText}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || `API error: ${response.status}`);
       }
 
       const data = await response.json();
-      
+
       // Adjust based on actual Suno API response structure
       if (data.audio_url || data.url) {
         setSongUrl(data.audio_url || data.url);
@@ -176,7 +149,7 @@ Create original lyrics that are inspired by these themes but don't directly quot
         setStatus('Song generation in progress. Response: ' + JSON.stringify(data).substring(0, 100));
       }
     } catch (error) {
-      setStatus(`Error: ${error.message}. Note: Check Suno AI API documentation for correct endpoints.`);
+      setStatus(`Error: ${error.message}. Note: Check Suno AI API configuration in Vercel.`);
     } finally {
       setLoading(false);
     }
@@ -190,35 +163,6 @@ Create original lyrics that are inspired by these themes but don't directly quot
         <div className="border-2 border-green-400 p-6 mb-6 bg-black bg-opacity-80">
           <h1 className="text-4xl mb-2 text-center glitch-text">MATRIX MUSIC GENERATOR</h1>
           <p className="text-center text-sm">News → Lyrics → Music</p>
-        </div>
-
-        {/* API Keys Section */}
-        <div className="border border-green-400 p-4 mb-6 bg-black bg-opacity-80">
-          <h2 className="text-xl mb-3">⚙️ API CONFIGURATION</h2>
-          <div className="space-y-3">
-            <div>
-              <label className="block mb-1 text-sm">NewsAPI Key:</label>
-              <input
-                type="password"
-                value={newsApiKey}
-                onChange={(e) => setNewsApiKey(e.target.value)}
-                placeholder="Enter your NewsAPI key"
-                className="w-full bg-black border border-green-400 text-green-400 p-2 focus:outline-none focus:border-green-300"
-              />
-              <p className="text-xs mt-1 opacity-70">Get free key at newsapi.org</p>
-            </div>
-            <div>
-              <label className="block mb-1 text-sm">Suno AI API Key:</label>
-              <input
-                type="password"
-                value={sunoApiKey}
-                onChange={(e) => setSunoApiKey(e.target.value)}
-                placeholder="Enter your Suno AI API key"
-                className="w-full bg-black border border-green-400 text-green-400 p-2 focus:outline-none focus:border-green-300"
-              />
-              <p className="text-xs mt-1 opacity-70">Get key from Suno AI</p>
-            </div>
-          </div>
         </div>
 
         {/* Status Display */}

@@ -19,7 +19,7 @@ The application features a Matrix-inspired cyberpunk aesthetic with animated gre
 - **Multi-headline selection**: Choose multiple news stories to inspire your lyrics
 - **Real-time status updates**: Visual feedback throughout the generation process
 - **Built-in audio player**: Listen to your generated songs immediately
-- **Secure API key management**: Input fields for your API credentials
+- **Secure API handling**: API keys stored as environment variables, never exposed to the browser
 
 ## Prerequisites
 
@@ -44,12 +44,24 @@ You'll need API keys from the following services:
    npm install
    ```
 
-3. Run the development server:
+3. Set up environment variables:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+   Then edit `.env.local` and add your API keys:
+   ```
+   NEWS_API_KEY=your_newsapi_key_here
+   ANTHROPIC_API_KEY=your_anthropic_api_key_here
+   SUNO_API_KEY=your_suno_api_key_here
+   ```
+
+4. Run the development server:
    ```bash
    npm run dev
    ```
 
-4. Open your browser to the URL shown in the terminal (typically `http://localhost:5173`)
+5. Open your browser to the URL shown in the terminal (typically `http://localhost:5173`)
 
 ### Deploy to Vercel
 
@@ -58,21 +70,26 @@ This project is configured for automatic deployment to Vercel:
 1. Push your code to GitHub
 2. Visit [vercel.com](https://vercel.com) and sign in with GitHub
 3. Click "New Project" and import your repository
-4. Vercel will automatically detect the Vite configuration and deploy
-5. Your app will be live with automatic deployments on every push!
+4. Vercel will automatically detect the Vite configuration
+5. **Important**: Add environment variables in Vercel:
+   - Go to "Settings" → "Environment Variables"
+   - Add these three variables:
+     - `NEWS_API_KEY` - Your NewsAPI key
+     - `ANTHROPIC_API_KEY` - Your Claude API key
+     - `SUNO_API_KEY` - Your Suno AI API key
+6. Click "Deploy"
+7. Your app will be live with automatic deployments on every push!
 
 ## Usage
 
-1. Open the application in your browser
+1. Open the application in your browser (make sure environment variables are configured)
 
-2. Enter your API keys in the input fields at the top
+2. Follow the three-step process:
+   - **Step 1**: Click "FETCH NEWS FROM MATRIX" to download current headlines and select news stories
+   - **Step 2**: Click "CREATE LYRICS" to generate song lyrics based on selected headlines
+   - **Step 3**: Click "TRANSMIT TO SUNO AI" to produce your music
 
-3. Follow the three-step process:
-   - **Step 1**: Click "Download Headlines" and select news stories
-   - **Step 2**: Click "Generate Lyrics" to create song lyrics
-   - **Step 3**: Click "Generate Song" to produce your music
-
-4. Listen to your AI-generated music!
+3. Listen to your AI-generated music in the built-in player!
 
 ## Technical Details
 
@@ -90,6 +107,10 @@ This project is configured for automatic deployment to Vercel:
 
 ```
 matrix-music-generator/
+├── api/                            # Vercel Serverless Functions
+│   ├── news.js                     # NewsAPI proxy endpoint
+│   ├── lyrics.js                   # Claude API proxy endpoint
+│   └── song.js                     # Suno AI proxy endpoint
 ├── src/
 │   ├── matrix-music-generator.jsx  # Main component
 │   ├── App.jsx                     # App wrapper
@@ -99,32 +120,38 @@ matrix-music-generator/
 ├── vite.config.js                  # Vite configuration
 ├── tailwind.config.js              # Tailwind configuration
 ├── vercel.json                     # Vercel deployment config
+├── .env.example                    # Environment variables template
 └── package.json                    # Dependencies
 ```
 
-The main component (`src/matrix-music-generator.jsx`) contains:
+### Architecture
 
+**Frontend** (`src/matrix-music-generator.jsx`):
 - **Matrix Animation**: Canvas-based falling characters effect
-- **API Integration Functions**:
-  - `fetchNews()`: Retrieves headlines from NewsAPI
-  - `generateLyrics()`: Creates lyrics using Claude AI
-  - `generateSong()`: Generates music with Suno AI
+- **API Integration**: Calls serverless functions at `/api/*`
 - **UI Components**: Three-step workflow interface with status indicators
+
+**Backend** (Vercel Serverless Functions in `api/`):
+- **`/api/news`**: Proxies requests to NewsAPI (avoids CORS and 426 errors)
+- **`/api/lyrics`**: Proxies requests to Claude API for lyrics generation
+- **`/api/song`**: Proxies requests to Suno AI for music generation
+- **Security**: API keys stored in environment variables, never exposed to the browser
 
 ## Security Notes
 
-- API keys are entered by users at runtime (not stored in code)
-- Use `.gitignore` to prevent accidentally committing sensitive files
-- Consider using environment variables for production deployments
+- API keys are stored as environment variables (never in code or exposed to the browser)
+- `.env.local` is in `.gitignore` to prevent accidentally committing secrets
+- Serverless functions act as a secure proxy layer between the frontend and external APIs
+- In Vercel, environment variables are encrypted and securely managed
 
 ## Future Enhancements
 
-- Package.json for dependency management
-- Environment variable configuration
-- Additional music generation options
 - Lyrics editing before song generation
+- Multiple music styles and genre selection
 - Save/download generated songs
-- Share functionality
+- Share functionality (social media integration)
+- Song history and playlist management
+- Custom theming options
 
 ## License
 
