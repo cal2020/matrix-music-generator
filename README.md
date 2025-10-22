@@ -25,9 +25,17 @@ The application features a Matrix-inspired cyberpunk aesthetic with animated gre
 
 You'll need API keys from the following services:
 
-- [NewsAPI](https://newsapi.org/) - For fetching news headlines
-- [Anthropic Claude](https://console.anthropic.com/) - For generating lyrics
-- [Suno AI](https://suno.ai/) - For music generation
+- **[NewsAPI](https://newsapi.org/)** - For fetching news headlines
+  - Sign up and get your free API key from the account page
+
+- **[Anthropic Claude](https://console.anthropic.com/)** - For generating lyrics
+  - Create an account and generate an API key (starts with `sk-ant-api03-...`)
+
+- **[SunoAPI.org](https://sunoapi.org/)** - For music generation
+  - **Important:** Suno.ai doesn't have an official public API yet. We use SunoAPI.org (third-party provider)
+  - Sign up at [https://sunoapi.org/](https://sunoapi.org/)
+  - Get your API key from [https://sunoapi.org/api-key](https://sunoapi.org/api-key)
+  - Uses Bearer token authentication with the V3.5 model
 
 ## Installation
 
@@ -99,9 +107,9 @@ This project is configured for automatic deployment to Vercel:
 - **Canvas Animation**: HTML5 Canvas for Matrix effect
 - **Deployment**: Vercel (with automatic deployments)
 - **APIs**:
-  - NewsAPI v2
+  - NewsAPI v2 (https://newsapi.org/v2/)
   - Anthropic Claude API (claude-sonnet-4-20250514)
-  - Suno AI API v1
+  - SunoAPI.org v1 (https://api.sunoapi.org - third-party Suno music generation provider)
 
 ## Project Structure
 
@@ -134,7 +142,8 @@ matrix-music-generator/
 **Backend** (Vercel Serverless Functions in `api/`):
 - **`/api/news`**: Proxies requests to NewsAPI (avoids CORS and 426 errors)
 - **`/api/lyrics`**: Proxies requests to Claude API for lyrics generation
-- **`/api/song`**: Proxies requests to Suno AI for music generation
+- **`/api/song`**: Proxies requests to SunoAPI.org for music generation (uses V3.5 model)
+- **`/api/test`**: Test endpoint to verify all API keys are configured correctly
 - **Security**: API keys stored in environment variables, never exposed to the browser
 
 ## Security Notes

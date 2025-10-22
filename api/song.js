@@ -29,16 +29,20 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Lyrics are required' });
     }
 
-    const response = await fetch('https://api.suno.ai/v1/generate', {
+    // Use SunoAPI.org endpoint (correct third-party provider)
+    const response = await fetch('https://api.sunoapi.org/api/v1/generate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        lyrics: lyrics,
+        custom_mode: true,
+        prompt: lyrics,
+        title: 'Matrix Music Generation',
+        tags: 'pop, electronic',
         make_instrumental: false,
-        wait_audio: true,
+        model: 'V3_5'
       }),
     });
 
