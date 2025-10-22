@@ -15,7 +15,11 @@ export default async function handler(req, res) {
   const apiKey = process.env.NEWS_API_KEY;
 
   if (!apiKey) {
-    return res.status(500).json({ error: 'NEWS_API_KEY not configured' });
+    console.error('NEWS_API_KEY environment variable is not set');
+    return res.status(500).json({
+      error: 'NEWS_API_KEY not configured',
+      message: 'Please add NEWS_API_KEY to your Vercel environment variables'
+    });
   }
 
   try {
@@ -26,12 +30,16 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (!response.ok) {
+      console.error('NewsAPI error:', response.status, data);
       return res.status(response.status).json(data);
     }
 
     return res.status(200).json(data);
   } catch (error) {
-    console.error('Error fetching news:', error);
-    return res.status(500).json({ error: 'Failed to fetch news' });
+    console.error('Error fetching news:', error.message, error.stack);
+    return res.status(500).json({
+      error: 'Failed to fetch news',
+      message: error.message
+    });
   }
 }
