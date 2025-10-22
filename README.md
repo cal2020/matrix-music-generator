@@ -31,7 +31,7 @@ You'll need API keys from the following services:
 
 ## Installation
 
-Since this is a single React component, you can integrate it into an existing React application:
+### Local Development
 
 1. Clone this repository:
    ```bash
@@ -39,53 +39,72 @@ Since this is a single React component, you can integrate it into an existing Re
    cd matrix-music-generator
    ```
 
-2. Copy the component into your React project:
+2. Install dependencies:
    ```bash
-   cp matrix-music-generator.jsx /path/to/your/react/app/src/components/
+   npm install
    ```
 
-3. Ensure your project has React and Tailwind CSS installed:
+3. Run the development server:
    ```bash
-   npm install react react-dom
-   # Set up Tailwind CSS if not already configured
+   npm run dev
    ```
+
+4. Open your browser to the URL shown in the terminal (typically `http://localhost:5173`)
+
+### Deploy to Vercel
+
+This project is configured for automatic deployment to Vercel:
+
+1. Push your code to GitHub
+2. Visit [vercel.com](https://vercel.com) and sign in with GitHub
+3. Click "New Project" and import your repository
+4. Vercel will automatically detect the Vite configuration and deploy
+5. Your app will be live with automatic deployments on every push!
 
 ## Usage
 
-1. Import the component into your React application:
-   ```javascript
-   import MatrixMusicGenerator from './components/matrix-music-generator';
-   ```
+1. Open the application in your browser
 
-2. Use it in your app:
-   ```javascript
-   function App() {
-     return <MatrixMusicGenerator />;
-   }
-   ```
+2. Enter your API keys in the input fields at the top
 
-3. Open the application in your browser and enter your API keys
-
-4. Follow the three-step process:
+3. Follow the three-step process:
    - **Step 1**: Click "Download Headlines" and select news stories
    - **Step 2**: Click "Generate Lyrics" to create song lyrics
    - **Step 3**: Click "Generate Song" to produce your music
 
+4. Listen to your AI-generated music!
+
 ## Technical Details
 
+- **Build Tool**: Vite
 - **Framework**: React (with Hooks: useState, useEffect, useRef)
 - **Styling**: Tailwind CSS
 - **Canvas Animation**: HTML5 Canvas for Matrix effect
+- **Deployment**: Vercel (with automatic deployments)
 - **APIs**:
   - NewsAPI v2
   - Anthropic Claude API (claude-sonnet-4-20250514)
   - Suno AI API v1
 
-## Component Structure
+## Project Structure
 
-The main component (`matrix-music-generator.jsx`) contains:
+```
+matrix-music-generator/
+├── src/
+│   ├── matrix-music-generator.jsx  # Main component
+│   ├── App.jsx                     # App wrapper
+│   ├── main.jsx                    # Entry point
+│   └── index.css                   # Tailwind directives
+├── index.html                      # HTML template
+├── vite.config.js                  # Vite configuration
+├── tailwind.config.js              # Tailwind configuration
+├── vercel.json                     # Vercel deployment config
+└── package.json                    # Dependencies
+```
 
-- **Matrix Animation** (lines 14-47): Canvas-based falling characters effect
+The main component (`src/matrix-music-generator.jsx`) contains:
+
+- **Matrix Animation**: Canvas-based falling characters effect
 - **API Integration Functions**:
   - `fetchNews()`: Retrieves headlines from NewsAPI
   - `generateLyrics()`: Creates lyrics using Claude AI
